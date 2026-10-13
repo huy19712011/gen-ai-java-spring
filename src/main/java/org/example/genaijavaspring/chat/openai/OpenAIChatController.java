@@ -1,6 +1,7 @@
 package org.example.genaijavaspring.chat.openai;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,12 +26,12 @@ public class OpenAIChatController {
     }
 
     @PostMapping("/summarize")
-    public String summarize(@RequestBody String message) {
+    public ChatClientResponse summarize(@RequestBody String message) {
 
         return chatClient.prompt()
                 .system(SYSTEM_PROMPT)
                 .user(message)
                 .call()
-                .content();
+                .chatClientResponse();
     }
 }
