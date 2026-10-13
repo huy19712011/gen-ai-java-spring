@@ -1,0 +1,18 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: gen-ai-java-spring
+
+  ai:
+    openai:
+      api-key: ${OPEN_API_KEY}
+      chat:
+        model: gpt-6-luna
+
+logging:
+  level:
+    root: info
+    org.example.genaijavaspring: INFO
+    org.springframework.ai: INFO
