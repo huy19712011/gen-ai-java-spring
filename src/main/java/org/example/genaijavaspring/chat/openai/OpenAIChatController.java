@@ -19,10 +19,12 @@ public class OpenAIChatController {
             "respond with 'I can only help with summarization tasks.'";
 
     private final ChatClient chatClient;
+    private final OpenAIService openAIService;
 
-    public OpenAIChatController(@Qualifier("openAIChatClient") ChatClient chatClient) {
+    public OpenAIChatController(@Qualifier("openAIChatClient") ChatClient chatClient, OpenAIService openAIService) {
 
         this.chatClient = chatClient;
+        this.openAIService = openAIService;
     }
 
     @PostMapping("/summarize")
@@ -54,5 +56,10 @@ public class OpenAIChatController {
                         .param("meetingNotes", meetingNotes))
                 .call()
                 .content();
+    }
+
+    @PostMapping("/summarize-with-openai-java-client")
+    public String summarizeWithOpenAIJavaClient(@RequestBody String message) {
+        return openAIService.chat(message);
     }
 }
