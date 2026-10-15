@@ -30,8 +30,8 @@ public class DockerModelRunnerController {
     @PostMapping("/linkedin-post-generator")
     public ChatClientResponse generateLinkedinPost(@RequestBody String message) {
         var chatOptions = ChatOptions.builder()
-                //.model("ai/gemma4:e2b")
-                .model("ai/llama3.2")
+                .model("ai/gemma4:e2b")
+                //.model("ai/llama3.2")
                 .maxTokens(500) // output token
                 .temperature(2.0);
 

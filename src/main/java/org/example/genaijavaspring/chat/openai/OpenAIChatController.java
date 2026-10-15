@@ -138,4 +138,17 @@ public class OpenAIChatController {
     public String summarizeWithOpenAIJavaClient(@RequestBody String message) {
         return openAIService.chat(message);
     }
+
+    @PostMapping("/general-chat")
+    public String generalChat(@RequestBody String message) {
+        var chatOptions = ChatOptions.builder()
+                .maxTokens(1000) // output token
+                .temperature(2.0);
+                //.stopSequences(List.of("END_OF_PARAGRAPH"));
+        return chatClient.prompt()
+                .options(chatOptions)
+                .user(message)
+                .call()
+                .content();
+    }
 }
