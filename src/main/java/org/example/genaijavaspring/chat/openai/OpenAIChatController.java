@@ -143,7 +143,8 @@ public class OpenAIChatController {
     public String generalChat(@RequestBody String message) {
         var chatOptions = ChatOptions.builder()
                 .maxTokens(1000) // output token
-                .temperature(2.0);
+                .temperature(2.0)
+                .topP(0.9);
                 //.stopSequences(List.of("END_OF_PARAGRAPH"));
         return chatClient.prompt()
                 .options(chatOptions)
