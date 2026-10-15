@@ -3,6 +3,7 @@ package org.example.genaijavaspring.chat.openai;
 import org.example.genaijavaspring.chat.openai.dto.response.SummarizationResponse;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ChatClientResponse;
+import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
@@ -38,7 +39,11 @@ public class OpenAIChatController {
     @PostMapping("/summarize")
     public ChatClientResponse summarize(@RequestBody String message) {
 
+        ChatOptions.Builder<?> chatOptionsBuilder = ChatOptions.builder()
+                .temperature(0.7d);
+
         return chatClient.prompt()
+                .options(chatOptionsBuilder)
                 .system(SYSTEM_PROMPT)
                 .user(message)
                 .call()
