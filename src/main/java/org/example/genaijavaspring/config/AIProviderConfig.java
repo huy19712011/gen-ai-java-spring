@@ -1,5 +1,6 @@
 package org.example.genaijavaspring.config;
 
+import org.example.genaijavaspring.chat.advisor.ErrorWrappingAdvisor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SafeGuardAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
@@ -16,10 +17,11 @@ public class AIProviderConfig {
     @Bean("openAIChatClient")
     ChatClient openAIChatClient(OpenAiChatModel openAiChatModel,
                                 SimpleLoggerAdvisor simpleLoggerAdvisor,
-                                SafeGuardAdvisor safeGuardAdvisor) {
+                                SafeGuardAdvisor safeGuardAdvisor,
+                                ErrorWrappingAdvisor errorWrappingAdvisor) {
 
         return ChatClient.builder(openAiChatModel)
-                .defaultAdvisors(simpleLoggerAdvisor, safeGuardAdvisor) // Note: Order is important!!!
+                .defaultAdvisors(simpleLoggerAdvisor, safeGuardAdvisor, errorWrappingAdvisor) // Note: Order is important!!!
                 .build();
     }
 
