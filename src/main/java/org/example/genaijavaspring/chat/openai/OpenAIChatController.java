@@ -85,7 +85,7 @@ public class OpenAIChatController {
 
     @PostMapping("/summarize-meeting-notes-structured")
     public SummarizationResponse summarizeMeetingNotesStructuredOutput(@RequestBody String meetingNotes) {
-        try {
+        //try {
             return chatClient.prompt()
                     .system(SYSTEM_PROMPT)
                     .user(u -> u.text("Can you summarize the following meeting notes: {meetingNotes}" +
@@ -103,9 +103,9 @@ public class OpenAIChatController {
                             .param("meetingNotes", meetingNotes))
                     .call()
                     .entity(SummarizationResponse.class);
-        } catch (Exception e) {
-            return new SummarizationResponse(null, null, e.getMessage());
-        }
+        //} catch (Exception e) {
+        //    return new SummarizationResponse(null, null, e.getMessage());
+        //}
     }
 
     @PostMapping("/summarize-meeting-notes-structured-list")

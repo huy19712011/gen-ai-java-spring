@@ -2,6 +2,7 @@ package org.example.genaijavaspring.config;
 
 import org.example.genaijavaspring.chat.advisor.ErrorWrappingAdvisor;
 import org.example.genaijavaspring.chat.advisor.SystemPromptAdvisor;
+import org.example.genaijavaspring.chat.advisor.ValidationAdvisor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SafeGuardAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
@@ -20,10 +21,11 @@ public class AIProviderConfig {
                                 SimpleLoggerAdvisor simpleLoggerAdvisor,
                                 SafeGuardAdvisor safeGuardAdvisor,
                                 ErrorWrappingAdvisor errorWrappingAdvisor,
-                                SystemPromptAdvisor systemPromptAdvisor) {
+                                SystemPromptAdvisor systemPromptAdvisor,
+                                ValidationAdvisor validationAdvisor) {
 
         return ChatClient.builder(openAiChatModel)
-                .defaultAdvisors(simpleLoggerAdvisor, systemPromptAdvisor, safeGuardAdvisor, errorWrappingAdvisor)
+                .defaultAdvisors(simpleLoggerAdvisor, systemPromptAdvisor, safeGuardAdvisor, errorWrappingAdvisor, validationAdvisor)
                 .build();
     }
 
