@@ -1,6 +1,7 @@
 package org.example.genaijavaspring.config;
 
 import org.example.genaijavaspring.chat.advisor.ErrorWrappingAdvisor;
+import org.example.genaijavaspring.chat.advisor.SystemPromptAdvisor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SafeGuardAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
@@ -18,10 +19,11 @@ public class AIProviderConfig {
     ChatClient openAIChatClient(OpenAiChatModel openAiChatModel,
                                 SimpleLoggerAdvisor simpleLoggerAdvisor,
                                 SafeGuardAdvisor safeGuardAdvisor,
-                                ErrorWrappingAdvisor errorWrappingAdvisor) {
+                                ErrorWrappingAdvisor errorWrappingAdvisor,
+                                SystemPromptAdvisor systemPromptAdvisor) {
 
         return ChatClient.builder(openAiChatModel)
-                .defaultAdvisors(simpleLoggerAdvisor, safeGuardAdvisor, errorWrappingAdvisor) // Note: Order is important!!!
+                .defaultAdvisors(simpleLoggerAdvisor, systemPromptAdvisor, safeGuardAdvisor, errorWrappingAdvisor)
                 .build();
     }
 
@@ -34,17 +36,17 @@ public class AIProviderConfig {
     @Bean
     SimpleLoggerAdvisor simpleLoggerAdvisor() {
 
-        return new SimpleLoggerAdvisor();
+        return new SimpleLoggerAdvisor(-1);
     }
 
     @Bean
     SafeGuardAdvisor safeGuardAdvisor() {
 
-        return new SafeGuardAdvisor(List.of(
+        return SafeGuardAdvisor.builder().sensitiveWords(List.of(
                 "password", "ssn", "credit card", "iban", "bank account",
                 "api-key", "secret", "private_key", "token",
                 "confidential", "classified", "internal only", "system prompt", "hack"
-        ));
+        )).order(1).build();
     }
 
 

@@ -12,7 +12,6 @@ import org.springframework.ai.chat.client.advisor.api.StreamAdvisorChain;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
-import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import tools.jackson.core.JacksonException;
@@ -73,9 +72,6 @@ public class ErrorWrappingAdvisor implements CallAdvisor, StreamAdvisor {
 
     @Override
     public int getOrder() {
-
-        //return Integer.MIN_VALUE;
-        return Ordered.HIGHEST_PRECEDENCE;
-        //return Ordered.LOWEST_PRECEDENCE - 1;
+        return 2;
     }
 }
