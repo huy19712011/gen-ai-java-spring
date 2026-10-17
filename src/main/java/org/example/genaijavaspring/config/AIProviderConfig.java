@@ -29,6 +29,11 @@ public class AIProviderConfig {
                 .build();
     }
 
+    @Bean("openAIGeneralChatClient")
+    ChatClient openAIGeneralChatClient(OpenAiChatModel openAiChatModel) {
+        return ChatClient.builder(openAiChatModel).build();
+    }
+
     @Bean("ollamaChatClient")
     ChatClient ollamaChatClient(OllamaChatModel ollamaChatModel) {
 

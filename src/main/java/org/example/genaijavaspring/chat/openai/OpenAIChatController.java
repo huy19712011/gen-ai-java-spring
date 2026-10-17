@@ -31,7 +31,7 @@ public class OpenAIChatController {
     private final ChatClient chatClient;
     private final OpenAIService openAIService;
 
-    public OpenAIChatController(@Qualifier("openAIChatClient") ChatClient chatClient, OpenAIService openAIService) {
+    public OpenAIChatController(@Qualifier("openAIGeneralChatClient") ChatClient chatClient, OpenAIService openAIService) {
 
         this.chatClient = chatClient;
         this.openAIService = openAIService;
@@ -140,17 +140,17 @@ public class OpenAIChatController {
         return openAIService.chat(message);
     }
 
-    @PostMapping("/general-chat")
-    public String generalChat(@RequestBody String message) {
-        var chatOptions = ChatOptions.builder()
-                .maxTokens(1000) // output token
-                .temperature(2.0)
-                .topP(0.9);
-                //.stopSequences(List.of("END_OF_PARAGRAPH"));
-        return chatClient.prompt()
-                .options(chatOptions)
-                .user(message)
-                .call()
-                .content();
-    }
+    //@PostMapping("/general-chat")
+    //public String generalChat(@RequestBody String message) {
+    //    var chatOptions = ChatOptions.builder()
+    //            .maxTokens(1000) // output token
+    //            .temperature(2.0)
+    //            .topP(0.9);
+    //            //.stopSequences(List.of("END_OF_PARAGRAPH"));
+    //    return chatClient.prompt()
+    //            .options(chatOptions)
+    //            .user(message)
+    //            .call()
+    //            .content();
+    //}
 }
