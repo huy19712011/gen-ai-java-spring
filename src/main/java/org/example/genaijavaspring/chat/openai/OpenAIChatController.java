@@ -4,8 +4,12 @@ import org.example.genaijavaspring.chat.openai.dto.response.SummarizationRespons
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.prompt.ChatOptions;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +20,7 @@ import reactor.core.publisher.Flux;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/openai/chat")
@@ -27,6 +32,9 @@ public class OpenAIChatController {
 
             //"Do not answer anything other than the summarization. If the question is not about summarization," +
             //"respond with 'I can only help with summarization tasks.'";
+
+    @Value("classpath:/templates/summarize-prompt.st")
+    private Resource summarizePrompt;
 
     private final ChatClient chatClient;
     private final OpenAIService openAIService;
@@ -106,6 +114,17 @@ public class OpenAIChatController {
         //} catch (Exception e) {
         //    return new SummarizationResponse(null, null, e.getMessage());
         //}
+    }
+
+    @PostMapping("/summarize-meeting-notes-structured-with-prompt-template")
+    public SummarizationResponse summarizeMeetingNotesStructuredOutputAndPromptTemplate(@RequestBody String meetingNotes) {
+        PromptTemplate promptTemplate = new PromptTemplate(summarizePrompt);
+        Prompt prompt = promptTemplate.create(Map.of("meetingNotes", meetingNotes));
+        return chatClient
+                .prompt(prompt)
+                .system(SYSTEM_PROMPT)
+                .call()
+                .entity(SummarizationResponse.class);
     }
 
     @PostMapping("/summarize-meeting-notes-structured-list")
