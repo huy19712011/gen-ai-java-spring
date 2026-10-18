@@ -10,7 +10,7 @@ spring:
       api-key: dummy-text #${OPENAI_API_KEY}
       base-url: http://localhost:12434/engines/llama.cpp/v1
       chat:
-        model: ai/llama3.2 #gpt-6-luna
+        model: ai/gemma4:e2b # ai/llama3.2 #gpt-6-luna
 
     ollama:
       base-url: http://localhost:11434
