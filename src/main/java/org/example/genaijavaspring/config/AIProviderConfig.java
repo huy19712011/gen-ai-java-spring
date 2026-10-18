@@ -3,6 +3,7 @@ package org.example.genaijavaspring.config;
 import org.example.genaijavaspring.chat.advisor.ErrorWrappingAdvisor;
 import org.example.genaijavaspring.chat.advisor.SystemPromptAdvisor;
 import org.example.genaijavaspring.chat.advisor.ValidationAdvisor;
+import org.example.genaijavaspring.chat.openai.jailbreak.demo.BankingTools;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SafeGuardAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
@@ -30,8 +31,10 @@ public class AIProviderConfig {
     }
 
     @Bean("openAIGeneralChatClient")
-    ChatClient openAIGeneralChatClient(OpenAiChatModel openAiChatModel) {
-        return ChatClient.builder(openAiChatModel).build();
+    ChatClient openAIGeneralChatClient(OpenAiChatModel openAiChatModel, BankingTools bankingTools) {
+        return ChatClient.builder(openAiChatModel)
+                .defaultTools(bankingTools)
+                .build();
     }
 
     @Bean("ollamaChatClient")
