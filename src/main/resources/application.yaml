@@ -1,6 +1,18 @@
 server:
   port: 8081
 
+app:
+  rag:
+    force-rebuild: true
+    top-k: 4
+    similarity-threshold: 0.0
+    chunk:
+      size: 800
+      min-chunk-size: 200
+      min-chunk-to-embed: 50
+      max-num-chunks: 8192
+      keep-separator: true
+
 spring:
   application:
     name: gen-ai-java-spring
