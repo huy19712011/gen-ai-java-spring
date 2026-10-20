@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Objects;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
@@ -32,7 +31,7 @@ public class ProductController {
 
     @PostMapping(value = "/upload-with-compliance-check", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String uploadAndAnalyzeProductImage(@RequestPart("file") MultipartFile file, @RequestPart("description") String description) {
-        log.info("Received file: {} ({} bytes) with description: {}", file.getOriginalFilename(), file.getSize(), description);
+        System.out.println("Received file: " + file.getOriginalFilename() + " (" + file.getSize() + " bytes) with description: " + description);
 
         return chatClient.prompt()
                 .system(SYSTEM_PROMPT)

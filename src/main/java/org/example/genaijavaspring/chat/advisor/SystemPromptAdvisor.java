@@ -16,7 +16,6 @@ import reactor.core.publisher.Flux;
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
 @Component
 public class SystemPromptAdvisor implements CallAdvisor, StreamAdvisor {
 
@@ -62,7 +61,7 @@ public class SystemPromptAdvisor implements CallAdvisor, StreamAdvisor {
                 .build()).build();
 
         String systemMessage = chatClientRequest.prompt().getSystemMessage().getText();
-        log.info("System Message is updated as: {}", systemMessage);
+        System.out.println("System Message is updated as: " + systemMessage);
         return chatClientRequest;
 
     }

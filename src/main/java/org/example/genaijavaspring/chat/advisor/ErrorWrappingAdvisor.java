@@ -20,7 +20,6 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 
-@Slf4j
 @Component
 public class ErrorWrappingAdvisor implements CallAdvisor, StreamAdvisor {
 
@@ -33,7 +32,7 @@ public class ErrorWrappingAdvisor implements CallAdvisor, StreamAdvisor {
     @Override
     public ChatClientResponse adviseCall(ChatClientRequest chatClientRequest, CallAdvisorChain callAdvisorChain) {
 
-        log.info("Request received in ErrorWrappingAdvisor with prompt: {}",
+        System.out.println("Request received in ErrorWrappingAdvisor with prompt: " +
                 chatClientRequest.prompt().getUserMessage().getText());
 
         ChatClientResponse chatClientResponse = callAdvisorChain.nextCall(chatClientRequest);

@@ -6,14 +6,13 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     @ResponseBody
     @ExceptionHandler(value = {Exception.class})
     public ErrorDto handleException(Exception exception) {
-        log.error("Exception occurred: {}", exception.getMessage(), exception);
+        System.err.println("Exception occurred: " + exception.getMessage());
         return new ErrorDto(HttpStatus.BAD_REQUEST.getReasonPhrase(), exception.getMessage());
     }
 

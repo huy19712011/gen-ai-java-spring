@@ -6,7 +6,6 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/orders/chat")
 public class OrderController {
@@ -37,9 +36,9 @@ public class OrderController {
 
     @PostMapping("/status")
     public String orderStatus(@RequestBody String message, @RequestHeader(value = "user-id") String userId) {
-        log.info("Chat memory for current user: {}", userId);
+        System.out.println("Chat memory for current user: " + userId);
         chatMemory.get(userId).forEach(m ->
-                log.info("{}: {}", m.getMessageType(), m.getMetadata()));
+                System.out.println(m.getMessageType() + ": " + m.getMetadata()));
 
         String userMessage = message + ". user-id: " + userId;
 

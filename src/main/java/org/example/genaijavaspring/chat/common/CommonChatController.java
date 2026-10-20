@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/common/chat")
 public class CommonChatController {
@@ -40,15 +39,15 @@ public class CommonChatController {
         Encoding encoding = registry.getEncodingForModel(chatClientResponse.chatResponse().getMetadata().getModel()).orElse(null);
 
         if (encoding == null) {
-            log.warn("Encoding not found for model: {}", chatClientResponse.chatResponse().getMetadata().getModel());
+            System.err.println("Encoding not found for model: " + chatClientResponse.chatResponse().getMetadata().getModel());
             return;
         }
 
         int inputTokenNumber = encoding.countTokens(message);
-        log.info("Input token number: {}", inputTokenNumber);
+        System.out.println("Input token number: " + inputTokenNumber);
 
         int outputTokenNumber = encoding.countTokens(chatClientResponse.chatResponse().getResult().getOutput().getText());
-        log.info("Output token number: {}", outputTokenNumber);
+        System.out.println("Output token number: " + outputTokenNumber);
     }
 
 }
