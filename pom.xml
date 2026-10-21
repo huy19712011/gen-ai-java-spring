@@ -69,6 +69,29 @@
             <artifactId>spring-ai-starter-model-chat-memory-repository-jdbc</artifactId>
         </dependency>
 
+
+        <!-- 3 dependencies for Advanced RAG -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jdbc</artifactId>
+        </dependency>
+
+        <!-- Source: https://mvnrepository.com/artifact/org.springframework.ai/spring-ai-pdf-document-reader -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-pdf-document-reader</artifactId>
+            <version>2.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Source: https://mvnrepository.com/artifact/org.springframework.ai/spring-ai-rag -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-rag</artifactId>
+            <version>2.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- Chat Memory with Vector Store -->
         <!-- Source: https://mvnrepository.com/artifact/org.springframework.ai/spring-ai-vector-store-advisor (version managed by spring-ai-bom) -->
         <dependency>

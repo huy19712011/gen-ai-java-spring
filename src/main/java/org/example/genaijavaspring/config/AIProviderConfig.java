@@ -4,6 +4,7 @@ import org.example.genaijavaspring.chat.advisor.ErrorWrappingAdvisor;
 import org.example.genaijavaspring.chat.advisor.SystemPromptAdvisor;
 import org.example.genaijavaspring.chat.advisor.ValidationAdvisor;
 import org.example.genaijavaspring.chat.openai.jailbreak.demo.BankingTools;
+import org.example.genaijavaspring.rag.config.data.PgVectorStoreConfigData;
 import org.example.genaijavaspring.rag.config.data.RagConfigData;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -19,8 +20,14 @@ import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiEmbeddingModel;
+import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
+import org.springframework.ai.rag.generation.augmentation.ContextualQueryAugmenter;
+import org.springframework.ai.rag.preretrieval.query.expansion.MultiQueryExpander;
+import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
+import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.pgvector.PgVectorStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,13 +62,69 @@ public class AIProviderConfig {
                 .build();
     }
 
-    @Bean
-    public PgVectorStore pgVectorStore(JdbcTemplate jdbcTemplate,
-                                       @Qualifier("openAiEmbeddingModel") EmbeddingModel embeddingModel) {
+    //@Bean
+    //public PgVectorStore pgVectorStore(JdbcTemplate jdbcTemplate,
+    //                                   @Qualifier("openAiEmbeddingModel") EmbeddingModel embeddingModel) {
+    //    return PgVectorStore.builder(jdbcTemplate, embeddingModel)
+    //            .initializeSchema(true)
+    //            .build();
+    //
+    //}
+
+    @Bean("chatMemoryVectorStore")
+    public VectorStore chatMemoryVectorStore(JdbcTemplate jdbcTemplate,
+                                             PgVectorStoreConfigData pgVectorStoreConfigData,
+                                             @Qualifier("openAiEmbeddingModel") EmbeddingModel embeddingModel) {
         return PgVectorStore.builder(jdbcTemplate, embeddingModel)
-                .initializeSchema(true)
+                .vectorTableName(pgVectorStoreConfigData.getTableNameForChatMemory())
+                .initializeSchema(pgVectorStoreConfigData.isInitializeSchema())
+                .dimensions(pgVectorStoreConfigData.getDimensions())
+                .distanceType(PgVectorStore.PgDistanceType.valueOf(pgVectorStoreConfigData.getDistanceType()))
+                .indexType(PgVectorStore.PgIndexType.valueOf(pgVectorStoreConfigData.getIndexType()))
+                .maxDocumentBatchSize(pgVectorStoreConfigData.getMaxDocumentBatchSize())
                 .build();
 
+    }
+
+    @Bean("ragVectorStore")
+    public VectorStore ragVectorStore(JdbcTemplate jdbcTemplate,
+                                      PgVectorStoreConfigData pgVectorStoreConfigData,
+                                      @Qualifier("openAiEmbeddingModel") EmbeddingModel embeddingModel) {
+        return PgVectorStore.builder(jdbcTemplate, embeddingModel)
+                .vectorTableName(pgVectorStoreConfigData.getTableNameForRag())
+                .initializeSchema(pgVectorStoreConfigData.isInitializeSchema())
+                .dimensions(pgVectorStoreConfigData.getDimensions())
+                .distanceType(PgVectorStore.PgDistanceType.valueOf(pgVectorStoreConfigData.getDistanceType()))
+                .indexType(PgVectorStore.PgIndexType.valueOf(pgVectorStoreConfigData.getIndexType()))
+                .maxDocumentBatchSize(pgVectorStoreConfigData.getMaxDocumentBatchSize())
+                .build();
+    }
+
+    @Bean
+    RetrievalAugmentationAdvisor ragAdvisor(@Qualifier("ragVectorStore") VectorStore vectorStore,
+                                            RagConfigData ragConfigData) {
+        return RetrievalAugmentationAdvisor.builder()
+                .documentRetriever(VectorStoreDocumentRetriever.builder()
+                        .vectorStore(vectorStore)
+                        .topK(ragConfigData.getTopK())
+                        .similarityThreshold(ragConfigData.getSimilarityThreshold())
+                        .build())
+                .queryAugmenter(ContextualQueryAugmenter.builder()
+                        .allowEmptyContext(false)
+                        .build())
+                .build();
+    }
+
+    @Bean
+    public TokenTextSplitter tokenTextSplitter(RagConfigData ragConfigData) {
+
+        return TokenTextSplitter.builder()
+                .withChunkSize(ragConfigData.getChunk().getMinChunkSize())
+                .withMinChunkSizeChars(ragConfigData.getChunk().getMinChunkSize())
+                .withMinChunkLengthToEmbed(ragConfigData.getChunk().getMinChunkToEmbed())
+                .withMaxNumChunks(ragConfigData.getChunk().getMaxNumChunks())
+                .withKeepSeparator(ragConfigData.getChunk().isKeepSeparator())
+                .build();
     }
 
     @Bean("openAIChatClient")
@@ -103,6 +166,22 @@ public class AIProviderConfig {
                                 .build())
                         .build(), simpleLoggerAdvisor)
                 .build();
+    }
+
+
+    @Bean("openAIAdvancedRAGChatClient")
+    ChatClient openAIAdvancedRAGChatClient(OpenAiChatModel openAiChatModel,
+                                           RetrievalAugmentationAdvisor retrievalAugmentationAdvisor) {
+        return ChatClient.builder(openAiChatModel)
+                .defaultAdvisors(retrievalAugmentationAdvisor)
+                .build();
+    }
+
+
+    @Bean
+    @Primary
+    EmbeddingModel primaryEmbedding(@Qualifier("openAiEmbeddingModel") EmbeddingModel delegateEmbeddingModel) {
+        return delegateEmbeddingModel;
     }
 
     @Bean("openAIChatClientWithMemory")
