@@ -4,10 +4,12 @@ import org.example.genaijavaspring.chat.advisor.ErrorWrappingAdvisor;
 import org.example.genaijavaspring.chat.advisor.SystemPromptAdvisor;
 import org.example.genaijavaspring.chat.advisor.ValidationAdvisor;
 import org.example.genaijavaspring.chat.openai.jailbreak.demo.BankingTools;
+import org.example.genaijavaspring.rag.config.data.RagConfigData;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SafeGuardAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.VectorStoreChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.ChatMemoryRepository;
@@ -17,6 +19,8 @@ import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiEmbeddingModel;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.ai.vectorstore.pgvector.PgVectorStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -86,6 +90,21 @@ public class AIProviderConfig {
         return ChatClient.builder(ollamaChatModel).build();
     }
 
+    @Bean("openAIRAGChatClient")
+    ChatClient openAIRAGChatClient(OpenAiChatModel openAiChatModel,
+                                   SimpleVectorStore simpleVectorStore,
+                                   SimpleLoggerAdvisor simpleLoggerAdvisor,
+                                   RagConfigData ragConfigData) {
+        return ChatClient.builder(openAiChatModel)
+                .defaultAdvisors(QuestionAnswerAdvisor.builder(simpleVectorStore)
+                        .searchRequest(SearchRequest.builder()
+                                .topK(ragConfigData.getTopK())
+                                .similarityThreshold(ragConfigData.getSimilarityThreshold())
+                                .build())
+                        .build(), simpleLoggerAdvisor)
+                .build();
+    }
+
     @Bean("openAIChatClientWithMemory")
     ChatClient openAIChatClientWithMemory(OpenAiChatModel openAiChatModel,
                                           ChatMemory chatMemory,
@@ -105,9 +124,9 @@ public class AIProviderConfig {
 
         return ChatClient.builder(openAiChatModel)
                 .defaultAdvisors(VectorStoreChatMemoryAdvisor.builder(pgVectorStore)
-                        .systemPromptTemplate(memoryPromptTemplate)
-                        .defaultTopK(TOP_K)
-                        .build(),
+                                .systemPromptTemplate(memoryPromptTemplate)
+                                .defaultTopK(TOP_K)
+                                .build(),
                         MessageChatMemoryAdvisor.builder(chatMemory).build())
                 //.defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
                 .build();
