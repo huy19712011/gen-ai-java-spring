@@ -34,11 +34,22 @@ public class EmployeeHandbookController {
     @PostMapping("/ask")
     public String employeeHandbook(@RequestBody String message) {
 
+        calculateSimilarity(message); // for example only
+
         return chatClient.prompt()
                 .system(SYSTEM_PROMPT)
                 .user(message)
                 .call()
                 .content();
+    }
+
+    private void calculateSimilarity(String message) {
+        float[] embeddingForMessage = embeddingModel.embed(message);
+        log.info("Embedding for {} - {}", message, embeddingForMessage);
+        float[] embeddingForVacationPolicy = embeddingModel.embed("Vacation policy");
+        log.info("Embedding for Vacation policy - {}", embeddingForVacationPolicy);
+        double similarityResult = SimpleVectorStore.EmbeddingMath.cosineSimilarity(embeddingForMessage, embeddingForVacationPolicy);
+        log.info("Cosine similarity for {} and Vacation policy = {}", message, similarityResult);
     }
 
 }
