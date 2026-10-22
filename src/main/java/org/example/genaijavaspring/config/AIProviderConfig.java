@@ -178,16 +178,10 @@ public class AIProviderConfig {
     }
 
 
-    @Bean
-    @Primary
-    EmbeddingModel primaryEmbedding(@Qualifier("openAiEmbeddingModel") EmbeddingModel delegateEmbeddingModel) {
-        return delegateEmbeddingModel;
-    }
-
     @Bean("openAIChatClientWithMemory")
     ChatClient openAIChatClientWithMemory(OpenAiChatModel openAiChatModel,
                                           ChatMemory chatMemory,
-                                          PgVectorStore pgVectorStore) {
+                                          @Qualifier("chatMemoryVectorStore") VectorStore chatMemoryVectorStore) {
         //PromptTemplate memoryPromptTemplate = new PromptTemplate("""
         //        {instructions}
         //
@@ -202,7 +196,7 @@ public class AIProviderConfig {
         PromptTemplate memoryPromptTemplate = new PromptTemplate(vectorStoreMemorySystemPrompt);
 
         return ChatClient.builder(openAiChatModel)
-                .defaultAdvisors(VectorStoreChatMemoryAdvisor.builder(pgVectorStore)
+                .defaultAdvisors(VectorStoreChatMemoryAdvisor.builder(chatMemoryVectorStore)
                                 .systemPromptTemplate(memoryPromptTemplate)
                                 .defaultTopK(TOP_K)
                                 .build(),

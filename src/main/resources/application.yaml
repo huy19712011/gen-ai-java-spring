@@ -14,7 +14,7 @@ app:
       keep-separator: true
     pdf:
       mode: page #paragraph
-      path: file:/Users/Shared/rag-files/qa-over-internal-docs/*.pdf #classpath:rag/qa-over-internal-docs/*.pdf
+      path: classpath:rag/qa-over-internal-docs/*.pdf # file:/Users/Shared/rag-files/qa-over-internal-docs/*.pdf
       pages-per-document: 1
       left-alignment: true
       number-of-top-text-lines-to-delete: 0
@@ -81,4 +81,7 @@ logging:
     root: info
     org.example.genaijavaspring: INFO
     org.springframework.ai: INFO
+    # PDFBox warns "Cannot execute restore, the graphics stack is empty" for malformed q/Q operators
+    # in compliance_responsibilities.pdf and scope_roles.pdf. Text extraction is unaffected.
+    org.apache.pdfbox.contentstream: ERROR
     org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor: DEBUG
