@@ -6,6 +6,7 @@ import org.example.genaijavaspring.chat.advisor.ValidationAdvisor;
 import org.example.genaijavaspring.chat.openai.jailbreak.demo.BankingTools;
 import org.example.genaijavaspring.rag.config.data.PgVectorStoreConfigData;
 import org.example.genaijavaspring.rag.config.data.RagConfigData;
+import org.example.genaijavaspring.rag.config.postprocessor.NeighbourStitchPostProcessor;
 import org.example.genaijavaspring.rag.config.preprocessor.DomainSynonymTransformer;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -104,7 +105,8 @@ public class AIProviderConfig {
     @Bean
     RetrievalAugmentationAdvisor ragAdvisor(@Qualifier("ragVectorStore") VectorStore vectorStore,
                                             RagConfigData ragConfigData,
-                                            DomainSynonymTransformer domainSynonymTransformer) {
+                                            DomainSynonymTransformer domainSynonymTransformer,
+                                            NeighbourStitchPostProcessor neighbourStitchPostProcessor) {
         return RetrievalAugmentationAdvisor.builder()
                 .queryTransformers(domainSynonymTransformer)
                 .documentRetriever(VectorStoreDocumentRetriever.builder()
@@ -112,6 +114,7 @@ public class AIProviderConfig {
                         .topK(ragConfigData.getTopK())
                         .similarityThreshold(ragConfigData.getSimilarityThreshold())
                         .build())
+                .documentPostProcessors(neighbourStitchPostProcessor)
                 .queryAugmenter(ContextualQueryAugmenter.builder()
                         .allowEmptyContext(false)
                         .build())
@@ -122,7 +125,7 @@ public class AIProviderConfig {
     public TokenTextSplitter tokenTextSplitter(RagConfigData ragConfigData) {
 
         return TokenTextSplitter.builder()
-                .withChunkSize(ragConfigData.getChunk().getMinChunkSize())
+                .withChunkSize(ragConfigData.getChunk().getSize())
                 .withMinChunkSizeChars(ragConfigData.getChunk().getMinChunkSize())
                 .withMinChunkLengthToEmbed(ragConfigData.getChunk().getMinChunkToEmbed())
                 .withMaxNumChunks(ragConfigData.getChunk().getMaxNumChunks())

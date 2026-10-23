@@ -18,6 +18,7 @@ public class RagConfigData {
     private ChunkProperties chunk;
     private PdfProperties pdf;
     private Map<String, String> synonyms;
+    private int radius;
 
     @Data
     public static class ChunkProperties {
