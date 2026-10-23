@@ -6,6 +6,7 @@ import org.example.genaijavaspring.chat.advisor.ValidationAdvisor;
 import org.example.genaijavaspring.chat.openai.jailbreak.demo.BankingTools;
 import org.example.genaijavaspring.rag.config.data.PgVectorStoreConfigData;
 import org.example.genaijavaspring.rag.config.data.RagConfigData;
+import org.example.genaijavaspring.rag.config.postprocessor.CitationHeaderPostProcessor;
 import org.example.genaijavaspring.rag.config.postprocessor.NeighbourStitchPostProcessor;
 import org.example.genaijavaspring.rag.config.preprocessor.DomainSynonymTransformer;
 import org.springframework.ai.chat.client.ChatClient;
@@ -106,7 +107,8 @@ public class AIProviderConfig {
     RetrievalAugmentationAdvisor ragAdvisor(@Qualifier("ragVectorStore") VectorStore vectorStore,
                                             RagConfigData ragConfigData,
                                             DomainSynonymTransformer domainSynonymTransformer,
-                                            NeighbourStitchPostProcessor neighbourStitchPostProcessor) {
+                                            NeighbourStitchPostProcessor neighbourStitchPostProcessor,
+                                            CitationHeaderPostProcessor citationHeaderPostProcessor) {
         return RetrievalAugmentationAdvisor.builder()
                 .queryTransformers(domainSynonymTransformer)
                 .documentRetriever(VectorStoreDocumentRetriever.builder()
@@ -114,7 +116,7 @@ public class AIProviderConfig {
                         .topK(ragConfigData.getTopK())
                         .similarityThreshold(ragConfigData.getSimilarityThreshold())
                         .build())
-                .documentPostProcessors(neighbourStitchPostProcessor)
+                .documentPostProcessors(neighbourStitchPostProcessor, citationHeaderPostProcessor)
                 .queryAugmenter(ContextualQueryAugmenter.builder()
                         .allowEmptyContext(false)
                         .build())

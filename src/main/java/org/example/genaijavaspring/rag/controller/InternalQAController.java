@@ -16,6 +16,8 @@ public class InternalQAController {
             Provide clear and concise solutions, troubleshooting steps, and recommendations.
             Use ONLY the provided CONTEXT. If not found, say I don't know.
             Cite sources as [source:page_number].
+            Each CONTEXT passage starts with a header like [source:filename.pdf, page_number:12].
+            When citing, copy the header’s values exactly (do not simplify to [source:12] or change labels).
             """;
 
     public InternalQAController(@Qualifier("openAIAdvancedRAGChatClient") ChatClient chatClient) {
