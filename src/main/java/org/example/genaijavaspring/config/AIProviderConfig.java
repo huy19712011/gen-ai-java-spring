@@ -6,6 +6,7 @@ import org.example.genaijavaspring.chat.advisor.ValidationAdvisor;
 import org.example.genaijavaspring.chat.openai.jailbreak.demo.BankingTools;
 import org.example.genaijavaspring.rag.config.data.PgVectorStoreConfigData;
 import org.example.genaijavaspring.rag.config.data.RagConfigData;
+import org.example.genaijavaspring.rag.config.preprocessor.DomainSynonymTransformer;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SafeGuardAdvisor;
@@ -102,8 +103,10 @@ public class AIProviderConfig {
 
     @Bean
     RetrievalAugmentationAdvisor ragAdvisor(@Qualifier("ragVectorStore") VectorStore vectorStore,
-                                            RagConfigData ragConfigData) {
+                                            RagConfigData ragConfigData,
+                                            DomainSynonymTransformer domainSynonymTransformer) {
         return RetrievalAugmentationAdvisor.builder()
+                .queryTransformers(domainSynonymTransformer)
                 .documentRetriever(VectorStoreDocumentRetriever.builder()
                         .vectorStore(vectorStore)
                         .topK(ragConfigData.getTopK())

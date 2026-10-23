@@ -5,6 +5,8 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Map;
+
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "app.rag")
@@ -15,6 +17,7 @@ public class RagConfigData {
     private double similarityThreshold;
     private ChunkProperties chunk;
     private PdfProperties pdf;
+    private Map<String, String> synonyms;
 
     @Data
     public static class ChunkProperties {
