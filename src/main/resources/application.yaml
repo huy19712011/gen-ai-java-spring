@@ -4,7 +4,7 @@ server:
 app:
   rag:
     force-rebuild: true
-    top-k: 3
+    top-k: 20
     similarity-threshold: 0.6
     radius: 1
     chunk:
@@ -20,6 +20,8 @@ app:
       left-alignment: true
       number-of-top-text-lines-to-delete: 0
       number-of-bottom-text-lines-to-delete: 0
+    query-expander:
+      number-of-queries: 4
 
     synonyms:
       PTO: "paid time off"

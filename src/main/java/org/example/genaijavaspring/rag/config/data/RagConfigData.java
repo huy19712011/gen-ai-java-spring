@@ -19,6 +19,7 @@ public class RagConfigData {
     private PdfProperties pdf;
     private Map<String, String> synonyms;
     private int radius;
+    private QueryExpansionProperties queryExpander;
 
     @Data
     public static class ChunkProperties {
@@ -37,6 +38,11 @@ public class RagConfigData {
         private boolean leftAlignment;
         private int numberOfTopTextLinesToDelete;
         private int numberOfBottomTextLinesToDelete;
+    }
+
+    @Data
+    public static class QueryExpansionProperties {
+        private int numberOfQueries;
     }
 
 

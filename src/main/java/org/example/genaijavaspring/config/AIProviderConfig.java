@@ -6,6 +6,7 @@ import org.example.genaijavaspring.chat.advisor.ValidationAdvisor;
 import org.example.genaijavaspring.chat.openai.jailbreak.demo.BankingTools;
 import org.example.genaijavaspring.rag.config.data.PgVectorStoreConfigData;
 import org.example.genaijavaspring.rag.config.data.RagConfigData;
+import org.example.genaijavaspring.rag.config.expansion.LenientMultiQueryExpander;
 import org.example.genaijavaspring.rag.config.postprocessor.CitationHeaderPostProcessor;
 import org.example.genaijavaspring.rag.config.postprocessor.NeighbourStitchPostProcessor;
 import org.example.genaijavaspring.rag.config.preprocessor.DomainSynonymTransformer;
@@ -22,10 +23,10 @@ import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.OpenAiEmbeddingModel;
 import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
 import org.springframework.ai.rag.generation.augmentation.ContextualQueryAugmenter;
-import org.springframework.ai.rag.preretrieval.query.expansion.MultiQueryExpander;
 import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -47,6 +48,9 @@ public class AIProviderConfig {
 
     @Value("classpath:/templates/vector-store-memory-system-prompt.st")
     private Resource vectorStoreMemorySystemPrompt;
+
+    @Value("classpath:/templates/query-expander-prompt.st")
+    private Resource queryExpanderPrompt;
 
     private static final int TOP_K = 10; // default = 20
     private static final int MAX_MESSAGES = 10; // default = 20
@@ -103,14 +107,29 @@ public class AIProviderConfig {
                 .build();
     }
 
+    @Bean("queryExpanderChatClientBuilder")
+    ChatClient.Builder queryExpanderChatClientBuilder(OpenAiChatModel openAiChatModel) {
+        return ChatClient.builder(openAiChatModel)
+                .defaultOptions(OpenAiChatOptions.builder()
+                        .temperature(0.7) // diverse paraphrases (0.0 produced near-duplicates)
+                        .maxTokens(1024) // reasoning models spend tokens before answering; 256 often yielded empty content
+                        );
+    }
+
     @Bean
     RetrievalAugmentationAdvisor ragAdvisor(@Qualifier("ragVectorStore") VectorStore vectorStore,
                                             RagConfigData ragConfigData,
                                             DomainSynonymTransformer domainSynonymTransformer,
                                             NeighbourStitchPostProcessor neighbourStitchPostProcessor,
-                                            CitationHeaderPostProcessor citationHeaderPostProcessor) {
+                                            CitationHeaderPostProcessor citationHeaderPostProcessor,
+                                            @Qualifier("queryExpanderChatClientBuilder") ChatClient.Builder queryExpanderChatClientBuilder) {
         return RetrievalAugmentationAdvisor.builder()
                 .queryTransformers(domainSynonymTransformer)
+                .queryExpander(new LenientMultiQueryExpander(
+                        queryExpanderChatClientBuilder,
+                        new PromptTemplate(queryExpanderPrompt),
+                        ragConfigData.getQueryExpander().getNumberOfQueries(),
+                        true))
                 .documentRetriever(VectorStoreDocumentRetriever.builder()
                         .vectorStore(vectorStore)
                         .topK(ragConfigData.getTopK())
