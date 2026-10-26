@@ -79,12 +79,39 @@ public class RagIngestionService {
         ingestDocumentChunksToVectorStore(pdfResources);
     }
 
+    //public void upsertOneByPath(Path path) {
+    //    log.info("Processing new path for ingestion: {}", path);
+    //    FileSystemResource resource = new FileSystemResource(path.toFile());
+    //    String source = resource.getFilename();
+    //
+    //    ingestDocumentChunksToVectorStore(new Resource[] {resource});
+    //}
+
     public void upsertOneByPath(Path path) {
         log.info("Processing new path for ingestion: {}", path);
         FileSystemResource resource = new FileSystemResource(path.toFile());
         String source = resource.getFilename();
+        String checksum = sha256Hex(resource);
+        // If same checksum already in DB, skip
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM " + ragVectorStoreTableName + " WHERE metadata->>'source'=? AND metadata->>'checksum'=?",
+                Integer.class, source, checksum);
 
-        ingestDocumentChunksToVectorStore(new Resource[] {resource});
+        if (count != null && count > 0) {
+            log.warn("Skipping new entry: Checksum already in DB!");
+            return;
+        }
+        deleteBySource(source);
+        ingestDocumentChunksToVectorStore(new Resource[]{resource});
+    }
+
+    public void deleteBySource(String source) {
+        try {
+            jdbcTemplate.update("DELETE FROM " + ragVectorStoreTableName + " WHERE metadata->>'source' = ?", source);
+            log.info("Deleted source: {} from vector store", source);
+        } catch (DataAccessException e) {
+            throw new RagException("Error deleting source: " + source + " from vector store!", e);
+        }
     }
 
 
@@ -115,7 +142,8 @@ public class RagIngestionService {
                 return null;
             }
             return pdfResources;
-        } catch (IOException e) {
+        } catch (
+                IOException e) {
             throw new RagException("Could not get pdf resources!", e);
         }
     }
@@ -131,7 +159,7 @@ public class RagIngestionService {
 
     private List<Document> getDocuments(Resource[] pdfResources) {
         List<Document> documents = new ArrayList<>();
-        for (Resource pdfResource: pdfResources) {
+        for (Resource pdfResource : pdfResources) {
             List<Document> parts = getDocumentParts(pdfResource);
             addMetadata(pdfResource, parts);
             documents.addAll(parts);
@@ -156,6 +184,8 @@ public class RagIngestionService {
             part.getMetadata().putIfAbsent(RagConstants.DOC_TYPE,
                     Objects.requireNonNull(pdfResource.getFilename()).substring(0, pdfResource.getFilename().indexOf(".")));
             part.getMetadata().putIfAbsent(RagConstants.UPDATED_AT, ZonedDateTime.now().toLocalDate().toString());
+            String checksum = sha256Hex(pdfResource);
+            part.getMetadata().put(RagConstants.CHECKSUM, checksum);
         }
     }
 
@@ -172,5 +202,32 @@ public class RagIngestionService {
         }
     }
 
+    /**
+     * Computes the SHA-256 hex digest of the given resource via DigestInputStream.
+     */
+    private String sha256Hex(Resource resource) {
+        try {
+            final MessageDigest messageDigest = newMessageDigest("SHA-256");
+
+            try (InputStream inputStream = resource.getInputStream();
+                 DigestInputStream digestInputStream = new DigestInputStream(inputStream, messageDigest)) {
+                //Drain the stream -> DigestInputStream updated messageDigest under the hood
+                digestInputStream.transferTo(OutputStream.nullOutputStream());
+            }
+
+            return HexFormat.of().formatHex(messageDigest.digest());
+        } catch (IOException e) {
+            throw new RagException("Error creating sha256Hex for resource " + resource.getFilename(), e);
+        }
+
+    }
+
+    private MessageDigest newMessageDigest(String algorithm) {
+        try {
+            return MessageDigest.getInstance(algorithm);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RagException("Missing JCA provider for " + algorithm, e);
+        }
+    }
 
 }

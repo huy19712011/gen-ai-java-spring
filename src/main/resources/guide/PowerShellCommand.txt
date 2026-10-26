@@ -1,0 +1,6 @@
+
+ Copy-Item -LiteralPath "scope_roles.pdf" -Destination "scope_roles.tmp"; if ($?) { Move-Item -LiteralPath "scope_roles.tmp" -Destination "scope_roles.pdf" -Force }
+
+ Copy-Item -LiteralPath "scope_roles.pdf" -Destination "scope_roles_updated.pdf"
+
+ Remove-Item -LiteralPath "scope.roles_updated.pdf" -Force -ErrorAction SilentlyContinue
