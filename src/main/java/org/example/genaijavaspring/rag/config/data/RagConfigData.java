@@ -20,6 +20,7 @@ public class RagConfigData {
     private Map<String, String> synonyms;
     private int radius;
     private QueryExpansionProperties queryExpander;
+    private RerankProperties rerank;
 
     @Data
     public static class ChunkProperties {
@@ -43,6 +44,14 @@ public class RagConfigData {
     @Data
     public static class QueryExpansionProperties {
         private int numberOfQueries;
+    }
+
+    @Data
+    public static class RerankProperties {
+        private String url;
+        private String apiKey;
+        private String model;
+        private int topN;
     }
 
 

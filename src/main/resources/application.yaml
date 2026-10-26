@@ -5,7 +5,7 @@ app:
   rag:
     force-rebuild: true
     top-k: 20
-    similarity-threshold: 0.6
+    similarity-threshold: 0.0
     radius: 1
     chunk:
       size: 100
@@ -22,6 +22,11 @@ app:
       number-of-bottom-text-lines-to-delete: 0
     query-expander:
       number-of-queries: 4
+    rerank:
+      url: "https://api.cohere.com/v2/rerank"
+      api-key: ${COHERE_API_KEY}
+      model: "rerank-english-v3.0"
+      top-n: 6
 
     synonyms:
       PTO: "paid time off"

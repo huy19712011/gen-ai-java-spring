@@ -10,6 +10,7 @@ import org.example.genaijavaspring.rag.config.expansion.LenientMultiQueryExpande
 import org.example.genaijavaspring.rag.config.postprocessor.CitationHeaderPostProcessor;
 import org.example.genaijavaspring.rag.config.postprocessor.NeighbourStitchPostProcessor;
 import org.example.genaijavaspring.rag.config.preprocessor.DomainSynonymTransformer;
+import org.example.genaijavaspring.rag.rerank.processor.RerankPostProcessor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SafeGuardAdvisor;
@@ -122,6 +123,7 @@ public class AIProviderConfig {
                                             DomainSynonymTransformer domainSynonymTransformer,
                                             NeighbourStitchPostProcessor neighbourStitchPostProcessor,
                                             CitationHeaderPostProcessor citationHeaderPostProcessor,
+                                            RerankPostProcessor rerankPostProcessor,
                                             @Qualifier("queryExpanderChatClientBuilder") ChatClient.Builder queryExpanderChatClientBuilder) {
         return RetrievalAugmentationAdvisor.builder()
                 .queryTransformers(domainSynonymTransformer)
@@ -135,7 +137,7 @@ public class AIProviderConfig {
                         .topK(ragConfigData.getTopK())
                         .similarityThreshold(ragConfigData.getSimilarityThreshold())
                         .build())
-                .documentPostProcessors(neighbourStitchPostProcessor, citationHeaderPostProcessor)
+                .documentPostProcessors(rerankPostProcessor, neighbourStitchPostProcessor, citationHeaderPostProcessor)
                 .queryAugmenter(ContextualQueryAugmenter.builder()
                         .allowEmptyContext(false)
                         .build())
