@@ -20,6 +20,7 @@ import org.springframework.ai.chat.client.advisor.vectorstore.VectorStoreChatMem
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.ChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.ollama.OllamaChatModel;
@@ -52,6 +53,9 @@ public class AIProviderConfig {
 
     @Value("classpath:/templates/query-expander-prompt.st")
     private Resource queryExpanderPrompt;
+
+    @Value("${spring.ai.openai.chat.model-vision}")
+    private String openAIVisionModel;
 
     private static final int TOP_K = 10; // default = 20
     private static final int MAX_MESSAGES = 10; // default = 20
@@ -203,6 +207,14 @@ public class AIProviderConfig {
                                            RetrievalAugmentationAdvisor retrievalAugmentationAdvisor) {
         return ChatClient.builder(openAiChatModel)
                 .defaultAdvisors(retrievalAugmentationAdvisor)
+                .build();
+    }
+
+    @Bean("openAIAgentChatClientVision")
+    ChatClient openAIAgentChatClientVision(OpenAiChatModel openAiChatModel) {
+        return ChatClient.builder(openAiChatModel)
+                .defaultOptions(ChatOptions.builder()
+                        .model(openAIVisionModel))
                 .build();
     }
 

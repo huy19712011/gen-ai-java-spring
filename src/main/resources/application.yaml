@@ -2,6 +2,12 @@ server:
   port: 8081
 
 app:
+  ai:
+    provider: openai
+  agent:
+    upload-dir: D:/agent-files/uploads
+    diagram-tool:
+      temperature: 0.2
   rag:
     force-rebuild: true
     top-k: 20
@@ -99,6 +105,7 @@ spring:
       base-url: http://localhost:12434/engines/llama.cpp/v1
       chat:
         model: ai/gemma4:e2b # ai/llama3.2 #gpt-6-luna
+        model-vision: ai/gemma4:e2b
       embedding:
         model: ai/embeddinggemma
 
