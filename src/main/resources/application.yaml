@@ -8,6 +8,9 @@ app:
     upload-dir: D:/agent-files/uploads
     diagram-tool:
       temperature: 0.2
+    posture-tool:
+      url: http://localhost:8082/api/posture/{id}
+      env: prod
   rag:
     force-rebuild: true
     top-k: 20

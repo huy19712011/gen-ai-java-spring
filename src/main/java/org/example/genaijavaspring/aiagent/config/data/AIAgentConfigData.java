@@ -11,10 +11,17 @@ public class AIAgentConfigData {
 
     private String uploadDir;
     private DiagramToolProperties diagramTool;
+    private PostureToolProperties postureTool;
 
     @Data
     public static class DiagramToolProperties {
         private Double temperature;
+    }
+
+    @Data
+    public static class PostureToolProperties {
+        private String url;
+        private String env;
     }
 
 }
