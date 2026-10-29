@@ -8,6 +8,7 @@ public class PostureServiceApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(PostureServiceApplication.class, args);
+        System.out.println("running...");
     }
 
 }
